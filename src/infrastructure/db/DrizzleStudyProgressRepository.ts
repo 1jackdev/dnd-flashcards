@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import type { StudyProgress, UpsertStudyProgressInput } from "../../domain/entities/StudyProgress";
 import type { IStudyProgressRepository } from "../../domain/ports/IStudyProgressRepository";

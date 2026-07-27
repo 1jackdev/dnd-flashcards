@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { CreateDeckInput, Deck } from "../../domain/entities/Deck";
 import type { IDeckRepository } from "../../domain/ports/IDeckRepository";

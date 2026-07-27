@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
 import type { CreateFlashcardInput, Flashcard } from "../../domain/entities/Flashcard";
 import type { IFlashcardRepository } from "../../domain/ports/IFlashcardRepository";

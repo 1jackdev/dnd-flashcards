@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { TAGS } from "../../domain/tags";
 import { createDb } from "./client";
 import { tags } from "./schema";
