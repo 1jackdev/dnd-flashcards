@@ -1,12 +1,14 @@
 # Seed Script Guide
 
-Scripts in this directory import D&D 5e SRD flashcard decks into the app via the REST API.
+`scripts/seeds/` contains individual deck import scripts. `scripts/seed.ts` is the runner.
 
 ## How it works
 
-`seed.ts` auto-discovers every file matching `seed-*.ts` in alphabetical order and runs them. Add a new file with the right prefix; it runs automatically with `bun run db:seed`.
+`seed.ts` auto-discovers every file matching `seed-*.ts` in `scripts/seeds/` alphabetically and runs them. Add a new file to `scripts/seeds/` with the right prefix; it runs automatically with `bun run db:seed`.
 
 ## File naming
+
+New files go in `scripts/seeds/`.
 
 | Content type | Pattern | Example |
 |---|---|---|
@@ -110,7 +112,7 @@ Use the most specific tags that apply. A card can have multiple tags.
 bun run db:seed
 
 # Run a single script
-bun run scripts/seed-conditions.ts
+bun run scripts/seeds/seed-conditions.ts
 
 # Target a different server
 API_URL=https://my-server.example.com bun run db:seed
