@@ -1,0 +1,15 @@
+info:
+  name: delete deck
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: http://localhost:3000/decks/{{deckId}}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

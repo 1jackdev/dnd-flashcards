@@ -1,35 +1,28 @@
-import type { Context } from "hono";
 import type { DeckService } from "../../../application/DeckService";
-import { requireParam } from "../params";
+import type { Deck } from "../../../domain/entities/Deck";
+import type { UUID } from "../../../domain/uuid";
 import type { CreateDeckInput, UpdateDeckInput } from "../schemas";
 
 export class DeckController {
 	constructor(private readonly deckService: DeckService) {}
 
-	async create(c: Context) {
-		const body = await c.req.json<CreateDeckInput>();
-		const deck = await this.deckService.createDeck(body);
-		return c.json(deck, 201);
+	create(input: CreateDeckInput): Deck {
+		return this.deckService.createDeck(input);
 	}
 
-	async getById(c: Context) {
-		const deck = await this.deckService.getDeck(requireParam(c, "id"));
-		return c.json(deck);
+	getById(id: UUID): Deck {
+		return this.deckService.getDeck(id);
 	}
 
-	async list(c: Context) {
-		const decks = await this.deckService.listDecks();
-		return c.json(decks);
+	list(): Deck[] {
+		return this.deckService.listDecks();
 	}
 
-	async update(c: Context) {
-		const body = await c.req.json<UpdateDeckInput>();
-		const deck = await this.deckService.updateDeck(requireParam(c, "id"), body);
-		return c.json(deck);
+	update(id: UUID, input: UpdateDeckInput): Deck {
+		return this.deckService.updateDeck(id, input);
 	}
 
-	async delete(c: Context) {
-		await this.deckService.deleteDeck(requireParam(c, "id"));
-		return c.body(null, 204);
+	delete(id: UUID): void {
+		this.deckService.deleteDeck(id);
 	}
 }

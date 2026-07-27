@@ -1,5 +1,7 @@
+import type { UUID } from "../uuid";
+
 export interface Deck {
-	id: string;
+	id: UUID;
 	name: string;
 	description: string;
 	createdAt: Date;

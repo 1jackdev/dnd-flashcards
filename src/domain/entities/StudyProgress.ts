@@ -1,7 +1,9 @@
+import type { UUID } from "../uuid";
+
 export interface StudyProgress {
-	id: string;
-	flashcardId: string;
-	userId: string;
+	id: UUID;
+	flashcardId: UUID;
+	userId: UUID;
 	easeFactor: number;
 	interval: number;
 	repetitions: number;
@@ -10,8 +12,8 @@ export interface StudyProgress {
 }
 
 export interface UpsertStudyProgressInput {
-	flashcardId: string;
-	userId: string;
+	flashcardId: UUID;
+	userId: UUID;
 	easeFactor: number;
 	interval: number;
 	repetitions: number;

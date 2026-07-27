@@ -1,0 +1,23 @@
+info:
+  name: create flashcard
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:3000/decks/{{deckId}}/cards
+  body:
+    type: json
+    data: |-
+      {
+        "front": "What is a Saving Throw?",
+        "back": "A roll to resist spells, traps, poison, and other harmful effects. Roll a d20 and add the relevant ability modifier.",
+        "tags": ["rule", "combat"]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,8 +1,9 @@
 import type { Tag } from "../tags";
+import type { UUID } from "../uuid";
 
 export interface Flashcard {
-	id: string;
-	deckId: string;
+	id: UUID;
+	deckId: UUID;
 	front: string;
 	back: string;
 	tags: Tag[];
@@ -11,7 +12,7 @@ export interface Flashcard {
 }
 
 export interface CreateFlashcardInput {
-	deckId: string;
+	deckId: UUID;
 	front: string;
 	back: string;
 	tags: Tag[];

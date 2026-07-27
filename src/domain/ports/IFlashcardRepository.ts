@@ -1,12 +1,13 @@
 import type { CreateFlashcardInput, Flashcard } from "../entities/Flashcard";
+import type { UUID } from "../uuid";
 
 export interface IFlashcardRepository {
-	create(input: CreateFlashcardInput): Promise<Flashcard>;
-	findById(id: string): Promise<Flashcard | null>;
-	findByDeckId(deckId: string): Promise<Flashcard[]>;
+	create(input: CreateFlashcardInput): Flashcard;
+	findById(id: UUID): Flashcard | null;
+	findByDeckId(deckId: UUID): Flashcard[];
 	update(
-		id: string,
+		id: UUID,
 		input: Partial<Pick<CreateFlashcardInput, "front" | "back" | "tags">>,
-	): Promise<Flashcard>;
-	delete(id: string): Promise<void>;
+	): Flashcard;
+	delete(id: UUID): void;
 }

@@ -1,32 +1,24 @@
-import type { Context } from "hono";
-import type { StudyService } from "../../../application/StudyService";
-import { ANONYMOUS_USER_ID } from "../../../domain/constants";
-import { requireParam } from "../params";
-import type { ReviewCardInput } from "../schemas";
+import type {
+	CardWithProgress,
+	DeckProgressSummary,
+	StudyService,
+} from "../../../application/StudyService";
+import type { StudyProgress } from "../../../domain/entities/StudyProgress";
+import type { Rating } from "../../../domain/rating";
+import type { UUID } from "../../../domain/uuid";
 
 export class StudyController {
 	constructor(private readonly studyService: StudyService) {}
 
-	async getDueCards(c: Context) {
-		const cards = await this.studyService.getDueCards(requireParam(c, "deckId"), ANONYMOUS_USER_ID);
-		return c.json(cards);
+	getDueCards(deckId: UUID, userId: UUID): CardWithProgress[] {
+		return this.studyService.getDueCards(deckId, userId);
 	}
 
-	async reviewCard(c: Context) {
-		const body = await c.req.json<ReviewCardInput>();
-		const progress = await this.studyService.reviewCard(
-			requireParam(c, "id"),
-			ANONYMOUS_USER_ID,
-			body.rating,
-		);
-		return c.json(progress);
+	reviewCard(flashcardId: UUID, userId: UUID, rating: Rating): StudyProgress {
+		return this.studyService.reviewCard(flashcardId, userId, rating);
 	}
 
-	async getDeckProgress(c: Context) {
-		const summary = await this.studyService.getDeckProgress(
-			requireParam(c, "deckId"),
-			ANONYMOUS_USER_ID,
-		);
-		return c.json(summary);
+	getDeckProgress(deckId: UUID, userId: UUID): DeckProgressSummary {
+		return this.studyService.getDeckProgress(deckId, userId);
 	}
 }

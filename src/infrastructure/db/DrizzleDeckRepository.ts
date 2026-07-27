@@ -1,41 +1,45 @@
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { CreateDeckInput, Deck } from "../../domain/entities/Deck";
 import type { IDeckRepository } from "../../domain/ports/IDeckRepository";
+import { newUUID, type UUID } from "../../domain/uuid";
 import type { DB } from "./client";
 import { decks } from "./schema";
 
 export class DrizzleDeckRepository implements IDeckRepository {
 	constructor(private readonly db: DB) {}
 
-	async create(input: CreateDeckInput): Promise<Deck> {
+	create(input: CreateDeckInput): Deck {
 		const now = new Date();
-		const id = randomUUID();
-		await this.db.insert(decks).values({ id, ...input, createdAt: now, updatedAt: now });
+		const id = newUUID();
+		this.db
+			.insert(decks)
+			.values({ id, ...input, createdAt: now, updatedAt: now })
+			.run();
 		return { id, ...input, createdAt: now, updatedAt: now };
 	}
 
-	async findById(id: string): Promise<Deck | null> {
-		const row = await this.db.select().from(decks).where(eq(decks.id, id)).get();
-		return row ?? null;
+	findById(id: UUID): Deck | null {
+		const row = this.db.select().from(decks).where(eq(decks.id, id)).get();
+		return row ? (row as Deck) : null;
 	}
 
-	async findAll(): Promise<Deck[]> {
-		return this.db.select().from(decks).all();
+	findAll(): Deck[] {
+		return this.db.select().from(decks).all() as Deck[];
 	}
 
-	async update(id: string, input: Partial<CreateDeckInput>): Promise<Deck> {
+	update(id: UUID, input: Partial<CreateDeckInput>): Deck {
 		const updatedAt = new Date();
-		await this.db
+		this.db
 			.update(decks)
 			.set({ ...input, updatedAt })
-			.where(eq(decks.id, id));
-		const row = await this.db.select().from(decks).where(eq(decks.id, id)).get();
+			.where(eq(decks.id, id))
+			.run();
+		const row = this.db.select().from(decks).where(eq(decks.id, id)).get();
 		if (!row) throw new Error(`Deck not found after update: ${id}`);
-		return row;
+		return row as Deck;
 	}
 
-	async delete(id: string): Promise<void> {
-		await this.db.delete(decks).where(eq(decks.id, id));
+	delete(id: UUID): void {
+		this.db.delete(decks).where(eq(decks.id, id)).run();
 	}
 }

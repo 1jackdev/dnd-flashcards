@@ -1,0 +1,8 @@
+[test]
+coverage = true
+coverageThreshold = { line = 0.8, function = 0.8 }
+coverageReporter = ["text", "lcov"]
+
+coveragePathIgnorePatterns = [
+	"tests/**"
+]

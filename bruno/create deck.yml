@@ -1,0 +1,22 @@
+info:
+  name: create deck
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:3000/decks
+  body:
+    type: json
+    data: |-
+      {
+        "name": "first deck",
+        "description": "this is the first deck"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

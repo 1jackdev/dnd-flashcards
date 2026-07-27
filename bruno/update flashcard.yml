@@ -1,0 +1,22 @@
+info:
+  name: update flashcard
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: http://localhost:3000/flashcards/{{flashcardId}}
+  body:
+    type: json
+    data: |-
+      {
+        "back": "A roll to resist spells, traps, poison, and other harmful effects. Roll a d20, add the relevant ability modifier, and compare to the spell save DC.",
+        "tags": ["rule", "combat", "ability"]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

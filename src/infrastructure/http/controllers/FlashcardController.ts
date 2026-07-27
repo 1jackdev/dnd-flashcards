@@ -1,36 +1,28 @@
-import type { Context } from "hono";
 import type { FlashcardService } from "../../../application/FlashcardService";
-import { requireParam } from "../params";
+import type { Flashcard } from "../../../domain/entities/Flashcard";
+import type { UUID } from "../../../domain/uuid";
 import type { CreateFlashcardInput, UpdateFlashcardInput } from "../schemas";
 
 export class FlashcardController {
 	constructor(private readonly flashcardService: FlashcardService) {}
 
-	async create(c: Context) {
-		const body = await c.req.json<CreateFlashcardInput>();
-		const deckId = requireParam(c, "deckId");
-		const card = await this.flashcardService.addCard({ deckId, ...body });
-		return c.json(card, 201);
+	create(deckId: UUID, input: CreateFlashcardInput): Flashcard {
+		return this.flashcardService.addCard({ deckId, ...input });
 	}
 
-	async getById(c: Context) {
-		const card = await this.flashcardService.getCard(requireParam(c, "id"));
-		return c.json(card);
+	getById(id: UUID): Flashcard {
+		return this.flashcardService.getCard(id);
 	}
 
-	async listByDeck(c: Context) {
-		const cards = await this.flashcardService.listCards(requireParam(c, "deckId"));
-		return c.json(cards);
+	listByDeck(deckId: UUID): Flashcard[] {
+		return this.flashcardService.listCards(deckId);
 	}
 
-	async update(c: Context) {
-		const body = await c.req.json<UpdateFlashcardInput>();
-		const card = await this.flashcardService.updateCard(requireParam(c, "id"), body);
-		return c.json(card);
+	update(id: UUID, input: UpdateFlashcardInput): Flashcard {
+		return this.flashcardService.updateCard(id, input);
 	}
 
-	async delete(c: Context) {
-		await this.flashcardService.deleteCard(requireParam(c, "id"));
-		return c.body(null, 204);
+	delete(id: UUID): void {
+		this.flashcardService.deleteCard(id);
 	}
 }
