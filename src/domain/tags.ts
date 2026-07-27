@@ -9,6 +9,8 @@ export const TAGS = [
 	"skill",
 	"combat",
 	"lore",
+	"class",
+	"race",
 ] as const;
 
 export type Tag = (typeof TAGS)[number];

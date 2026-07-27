@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
+import { TAGS } from "../../src/domain/tags";
 import type { decks, flashcards, studyProgress } from "../../src/infrastructure/db/schema";
 
 type DeckRow = typeof decks.$inferSelect;
@@ -19,6 +20,7 @@ export const flashcardRowFactory = Factory.define<FlashcardRow>(() => ({
 	deckId: faker.string.uuid(),
 	front: `${faker.lorem.sentence()}?`,
 	back: faker.lorem.sentence(),
+	tags: [faker.helpers.arrayElement(TAGS)],
 	createdAt: faker.date.past(),
 	updatedAt: faker.date.past(),
 }));

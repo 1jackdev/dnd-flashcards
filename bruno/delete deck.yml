@@ -8,6 +8,11 @@ http:
   url: http://localhost:3000/decks/{{deckId}}
   auth: inherit
 
+runtime:
+  variables:
+    - name: deckId
+      value: 23a69a26-415c-4141-9689-b62df0a485db
+
 settings:
   encodeUrl: true
   timeout: 0

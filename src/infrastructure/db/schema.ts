@@ -17,33 +17,11 @@ export const flashcards = sqliteTable(
 			.references(() => decks.id, { onDelete: "cascade" }),
 		front: text("front").notNull(),
 		back: text("back").notNull(),
+		tags: text("tags", { mode: "json" }).notNull().$type<string[]>(),
 		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 	},
-	(t) => ({
-		deckIdIdx: index("flashcards_deck_id_idx").on(t.deckId),
-	}),
-);
-
-export const tags = sqliteTable("tags", {
-	id: text("id").primaryKey(),
-	name: text("name").notNull().unique(),
-});
-
-export const flashcardTags = sqliteTable(
-	"flashcard_tags",
-	{
-		flashcardId: text("flashcard_id")
-			.notNull()
-			.references(() => flashcards.id, { onDelete: "cascade" }),
-		tagId: text("tag_id")
-			.notNull()
-			.references(() => tags.id, { onDelete: "cascade" }),
-	},
-	(t) => ({
-		flashcardIdx: index("flashcard_tags_flashcard_id_idx").on(t.flashcardId),
-		tagIdx: index("flashcard_tags_tag_id_idx").on(t.tagId),
-	}),
+	(t) => [index("flashcards_deck_id_idx").on(t.deckId)],
 );
 
 export const studyProgress = sqliteTable(
@@ -60,8 +38,8 @@ export const studyProgress = sqliteTable(
 		nextReviewAt: integer("next_review_at", { mode: "timestamp" }).notNull(),
 		lastReviewedAt: integer("last_reviewed_at", { mode: "timestamp" }),
 	},
-	(t) => ({
-		userCardIdx: index("study_progress_user_card_idx").on(t.userId, t.flashcardId),
-		userIdx: index("study_progress_user_idx").on(t.userId),
-	}),
+	(t) => [
+		index("study_progress_user_card_idx").on(t.userId, t.flashcardId),
+		index("study_progress_user_idx").on(t.userId),
+	],
 );
