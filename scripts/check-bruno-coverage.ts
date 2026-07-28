@@ -21,7 +21,10 @@ function extractBrunoRoutes(dir: string): string[] {
 			const method = content.match(/method:\s*(\w+)/)?.[1];
 			const url = content.match(/url:\s*(.+)/)?.[1]?.trim();
 			if (!method || !url) return [];
-			const path = url.replace("http://localhost:3000", "").replace(/\{\{[^}]+\}\}/g, ":param");
+			const path = url
+				.replace("http://localhost:3000", "")
+				.replace(/\?.*$/, "")
+				.replace(/\{\{[^}]+\}\}/g, ":param");
 			return [`${method.toUpperCase()} ${path}`];
 		});
 }
@@ -33,6 +36,9 @@ function normalize(route: string): string {
 const appRoutes = [
 	...extractAppRoutes(join(ROUTES_DIR, "deck.routes.ts"), "/decks"),
 	...extractAppRoutes(join(ROUTES_DIR, "flashcard.routes.ts"), "/flashcards"),
+	...extractAppRoutes(join(ROUTES_DIR, "quiz.routes.ts"), "/quiz"),
+	...extractAppRoutes(join(ROUTES_DIR, "auth.routes.ts"), "/auth"),
+	...extractAppRoutes(join(ROUTES_DIR, "tags.routes.ts"), "/tags"),
 ];
 
 const brunoRoutes = extractBrunoRoutes(BRUNO_DIR);

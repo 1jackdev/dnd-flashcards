@@ -5,27 +5,27 @@ import type { UUID } from "../domain/uuid";
 export class DeckService {
 	constructor(private readonly deckRepo: IDeckRepository) {}
 
-	createDeck(input: CreateDeckInput): Deck {
+	createDeck(input: CreateDeckInput): Promise<Deck> {
 		return this.deckRepo.create(input);
 	}
 
-	getDeck(id: UUID): Deck {
-		const deck = this.deckRepo.findById(id);
+	async getDeck(id: UUID): Promise<Deck> {
+		const deck = await this.deckRepo.findById(id);
 		if (!deck) throw new Error(`Deck not found: ${id}`);
 		return deck;
 	}
 
-	listDecks(): Deck[] {
+	listDecks(): Promise<Deck[]> {
 		return this.deckRepo.findAll();
 	}
 
-	updateDeck(id: UUID, input: Partial<CreateDeckInput>): Deck {
-		this.getDeck(id);
+	async updateDeck(id: UUID, input: Partial<CreateDeckInput>): Promise<Deck> {
+		await this.getDeck(id);
 		return this.deckRepo.update(id, input);
 	}
 
-	deleteDeck(id: UUID): void {
-		this.getDeck(id);
-		this.deckRepo.delete(id);
+	async deleteDeck(id: UUID): Promise<void> {
+		await this.getDeck(id);
+		await this.deckRepo.delete(id);
 	}
 }

@@ -6,23 +6,23 @@ import type { CreateDeckInput, UpdateDeckInput } from "../schemas";
 export class DeckController {
 	constructor(private readonly deckService: DeckService) {}
 
-	create(input: CreateDeckInput): Deck {
+	create(input: CreateDeckInput): Promise<Deck> {
 		return this.deckService.createDeck(input);
 	}
 
-	getById(id: UUID): Deck {
+	getById(id: UUID): Promise<Deck> {
 		return this.deckService.getDeck(id);
 	}
 
-	list(): Deck[] {
+	list(): Promise<Deck[]> {
 		return this.deckService.listDecks();
 	}
 
-	update(id: UUID, input: UpdateDeckInput): Deck {
+	update(id: UUID, input: UpdateDeckInput): Promise<Deck> {
 		return this.deckService.updateDeck(id, input);
 	}
 
-	delete(id: UUID): void {
-		this.deckService.deleteDeck(id);
+	delete(id: UUID): Promise<void> {
+		return this.deckService.deleteDeck(id);
 	}
 }

@@ -1,0 +1,15 @@
+info:
+  name: get deck quiz progress
+  type: http
+  seq: 20
+
+http:
+  method: GET
+  url: http://localhost:3000/decks/{{deckId}}/quiz-progress
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

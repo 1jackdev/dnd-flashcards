@@ -1,12 +1,13 @@
-import { Database } from "bun:sqlite";
-import { drizzle } from "drizzle-orm/bun-sqlite";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
-export type DB = ReturnType<typeof createDb>;
+export type DB = Awaited<ReturnType<typeof createDb>>;
 
-export function createDb(path: string) {
-	const sqlite = new Database(path);
-	sqlite.exec("PRAGMA journal_mode = WAL;");
-	sqlite.exec("PRAGMA foreign_keys = ON;");
-	return drizzle(sqlite, { schema });
+export async function createDb(url: string, authToken: string) {
+	const client = createClient({ url, authToken });
+	// libsql doesn't enable FK enforcement by default; unlike bun:sqlite's PRAGMA
+	// at construction time, this must be an awaited statement against the client.
+	await client.execute("PRAGMA foreign_keys = ON;");
+	return drizzle(client, { schema });
 }

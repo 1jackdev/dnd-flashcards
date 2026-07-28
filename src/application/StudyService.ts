@@ -4,6 +4,7 @@ import type { IFlashcardRepository } from "../domain/ports/IFlashcardRepository"
 import type { IStudyProgressRepository } from "../domain/ports/IStudyProgressRepository";
 import type { Rating } from "../domain/rating";
 import { calculateSM2 } from "../domain/sm2";
+import type { Tag } from "../domain/tags";
 import type { UUID } from "../domain/uuid";
 
 export interface CardWithProgress {
@@ -27,9 +28,9 @@ export class StudyService {
 		private readonly studyProgressRepo: IStudyProgressRepository,
 	) {}
 
-	getDueCards(deckId: UUID, userId: UUID): CardWithProgress[] {
-		const cards = this.flashcardRepo.findByDeckId(deckId);
-		const progressList = this.studyProgressRepo.findByDeckAndUser(deckId, userId);
+	async getDueCards(deckId: UUID, userId: UUID): Promise<CardWithProgress[]> {
+		const cards = await this.flashcardRepo.findByDeckId(deckId);
+		const progressList = await this.studyProgressRepo.findByDeckAndUser(deckId, userId);
 		const progressMap = new Map(progressList.map((p) => [p.flashcardId, p]));
 		const now = new Date();
 
@@ -38,8 +39,8 @@ export class StudyService {
 			.filter(({ progress }) => !progress || progress.nextReviewAt <= now);
 	}
 
-	reviewCard(flashcardId: UUID, userId: UUID, rating: Rating): StudyProgress {
-		const existing = this.studyProgressRepo.findByFlashcardAndUser(flashcardId, userId);
+	async reviewCard(flashcardId: UUID, userId: UUID, rating: Rating): Promise<StudyProgress> {
+		const existing = await this.studyProgressRepo.findByFlashcardAndUser(flashcardId, userId);
 
 		const sm2Input = existing ?? {
 			easeFactor: DEFAULT_EASE_FACTOR,
@@ -55,9 +56,29 @@ export class StudyService {
 		});
 	}
 
-	getDeckProgress(deckId: UUID, userId: UUID): DeckProgressSummary {
-		const cards = this.flashcardRepo.findByDeckId(deckId);
-		const progressList = this.studyProgressRepo.findByDeckAndUser(deckId, userId);
+	async getDeckProgress(deckId: UUID, userId: UUID): Promise<DeckProgressSummary> {
+		const cards = await this.flashcardRepo.findByDeckId(deckId);
+		const progressList = await this.studyProgressRepo.findByDeckAndUser(deckId, userId);
+		const progressMap = new Map(progressList.map((p) => [p.flashcardId, p]));
+		const now = new Date();
+
+		let dueNow = 0;
+		let mastered = 0;
+
+		const cardWithProgress: CardWithProgress[] = cards.map((flashcard) => {
+			const progress = progressMap.get(flashcard.id) ?? null;
+			if (!progress || progress.nextReviewAt <= now) dueNow++;
+			if (progress && progress.interval >= MASTERED_INTERVAL_THRESHOLD) mastered++;
+			return { flashcard, progress };
+		});
+
+		return { total: cards.length, dueNow, mastered, cards: cardWithProgress };
+	}
+
+	async getProgressByTags(tags: Tag[], userId: UUID): Promise<DeckProgressSummary> {
+		const cards = await this.flashcardRepo.findByTags(tags);
+		const cardIds = cards.map((c) => c.id);
+		const progressList = await this.studyProgressRepo.findByFlashcardIdsAndUser(cardIds, userId);
 		const progressMap = new Map(progressList.map((p) => [p.flashcardId, p]));
 		const now = new Date();
 

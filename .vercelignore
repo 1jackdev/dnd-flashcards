@@ -1,0 +1,9 @@
+flashcards.db
+flashcards.db-shm
+flashcards.db-wal
+drizzle/
+bruno/
+tests/
+scripts/
+architecture.md
+.env

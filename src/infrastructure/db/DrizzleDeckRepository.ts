@@ -8,38 +8,38 @@ import { decks } from "./schema";
 export class DrizzleDeckRepository implements IDeckRepository {
 	constructor(private readonly db: DB) {}
 
-	create(input: CreateDeckInput): Deck {
+	async create(input: CreateDeckInput): Promise<Deck> {
 		const now = new Date();
 		const id = newUUID();
-		this.db
+		await this.db
 			.insert(decks)
 			.values({ id, ...input, createdAt: now, updatedAt: now })
 			.run();
 		return { id, ...input, createdAt: now, updatedAt: now };
 	}
 
-	findById(id: UUID): Deck | null {
-		const row = this.db.select().from(decks).where(eq(decks.id, id)).get();
+	async findById(id: UUID): Promise<Deck | null> {
+		const row = await this.db.select().from(decks).where(eq(decks.id, id)).get();
 		return row ? (row as Deck) : null;
 	}
 
-	findAll(): Deck[] {
-		return this.db.select().from(decks).all() as Deck[];
+	async findAll(): Promise<Deck[]> {
+		return (await this.db.select().from(decks).all()) as Deck[];
 	}
 
-	update(id: UUID, input: Partial<CreateDeckInput>): Deck {
+	async update(id: UUID, input: Partial<CreateDeckInput>): Promise<Deck> {
 		const updatedAt = new Date();
-		this.db
+		await this.db
 			.update(decks)
 			.set({ ...input, updatedAt })
 			.where(eq(decks.id, id))
 			.run();
-		const row = this.db.select().from(decks).where(eq(decks.id, id)).get();
+		const row = await this.db.select().from(decks).where(eq(decks.id, id)).get();
 		if (!row) throw new Error(`Deck not found after update: ${id}`);
 		return row as Deck;
 	}
 
-	delete(id: UUID): void {
-		this.db.delete(decks).where(eq(decks.id, id)).run();
+	async delete(id: UUID): Promise<void> {
+		await this.db.delete(decks).where(eq(decks.id, id)).run();
 	}
 }

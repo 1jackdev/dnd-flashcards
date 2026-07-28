@@ -4,13 +4,13 @@ import { deckFactory, makeMockDeckRepo } from "../factories/domain";
 
 describe("DeckService", () => {
 	describe("createDeck", () => {
-		test("calls repo.create and returns result", () => {
+		test("calls repo.create and returns result", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ create: mock(() => deck) });
+			const repo = makeMockDeckRepo({ create: mock(async () => deck) });
 			const service = new DeckService(repo);
 
 			const input = { name: deck.name, description: deck.description };
-			const result = service.createDeck(input);
+			const result = await service.createDeck(input);
 
 			expect(repo.create).toHaveBeenCalledWith(input);
 			expect(result).toEqual(deck);
@@ -18,52 +18,52 @@ describe("DeckService", () => {
 	});
 
 	describe("getDeck", () => {
-		test("returns deck when found", () => {
+		test("returns deck when found", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ findById: mock(() => deck) });
+			const repo = makeMockDeckRepo({ findById: mock(async () => deck) });
 			const service = new DeckService(repo);
 
-			expect(service.getDeck(deck.id)).toEqual(deck);
+			expect(await service.getDeck(deck.id)).toEqual(deck);
 		});
 
-		test("throws when not found", () => {
+		test("throws when not found", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ findById: mock(() => null) });
+			const repo = makeMockDeckRepo({ findById: mock(async () => null) });
 			const service = new DeckService(repo);
 
-			expect(() => service.getDeck(deck.id)).toThrow(`Deck not found: ${deck.id}`);
+			await expect(service.getDeck(deck.id)).rejects.toThrow(`Deck not found: ${deck.id}`);
 		});
 	});
 
 	describe("listDecks", () => {
-		test("returns all decks from repo", () => {
+		test("returns all decks from repo", async () => {
 			const decks = deckFactory.buildList(3);
-			const repo = makeMockDeckRepo({ findAll: mock(() => decks) });
+			const repo = makeMockDeckRepo({ findAll: mock(async () => decks) });
 			const service = new DeckService(repo);
 
-			expect(service.listDecks()).toEqual(decks);
+			expect(await service.listDecks()).toEqual(decks);
 		});
 	});
 
 	describe("updateDeck", () => {
-		test("throws when deck not found", () => {
+		test("throws when deck not found", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ findById: mock(() => null) });
+			const repo = makeMockDeckRepo({ findById: mock(async () => null) });
 			const service = new DeckService(repo);
 
-			expect(() => service.updateDeck(deck.id, { name: "New name" })).toThrow();
+			await expect(service.updateDeck(deck.id, { name: "New name" })).rejects.toThrow();
 		});
 
-		test("calls repo.update and returns result", () => {
+		test("calls repo.update and returns result", async () => {
 			const deck = deckFactory.build();
 			const updated = deckFactory.build({ name: "New name" });
 			const repo = makeMockDeckRepo({
-				findById: mock(() => deck),
-				update: mock(() => updated),
+				findById: mock(async () => deck),
+				update: mock(async () => updated),
 			});
 			const service = new DeckService(repo);
 
-			const result = service.updateDeck(deck.id, { name: "New name" });
+			const result = await service.updateDeck(deck.id, { name: "New name" });
 
 			expect(repo.update).toHaveBeenCalledWith(deck.id, { name: "New name" });
 			expect(result).toEqual(updated);
@@ -71,20 +71,20 @@ describe("DeckService", () => {
 	});
 
 	describe("deleteDeck", () => {
-		test("throws when deck not found", () => {
+		test("throws when deck not found", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ findById: mock(() => null) });
+			const repo = makeMockDeckRepo({ findById: mock(async () => null) });
 			const service = new DeckService(repo);
 
-			expect(() => service.deleteDeck(deck.id)).toThrow();
+			await expect(service.deleteDeck(deck.id)).rejects.toThrow();
 		});
 
-		test("calls repo.delete when found", () => {
+		test("calls repo.delete when found", async () => {
 			const deck = deckFactory.build();
-			const repo = makeMockDeckRepo({ findById: mock(() => deck) });
+			const repo = makeMockDeckRepo({ findById: mock(async () => deck) });
 			const service = new DeckService(repo);
 
-			service.deleteDeck(deck.id);
+			await service.deleteDeck(deck.id);
 
 			expect(repo.delete).toHaveBeenCalledWith(deck.id);
 		});

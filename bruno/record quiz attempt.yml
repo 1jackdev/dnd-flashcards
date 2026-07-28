@@ -1,0 +1,21 @@
+info:
+  name: record quiz attempt
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: http://localhost:3000/quiz/{{quizQuestionId}}/attempt
+  body:
+    type: json
+    data: |-
+      {
+        "correct": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -8,8 +8,8 @@ import { flashcards, studyProgress } from "./schema";
 export class DrizzleStudyProgressRepository implements IStudyProgressRepository {
 	constructor(private readonly db: DB) {}
 
-	findByFlashcardAndUser(flashcardId: UUID, userId: UUID): StudyProgress | null {
-		const row = this.db
+	async findByFlashcardAndUser(flashcardId: UUID, userId: UUID): Promise<StudyProgress | null> {
+		const row = await this.db
 			.select()
 			.from(studyProgress)
 			.where(and(eq(studyProgress.flashcardId, flashcardId), eq(studyProgress.userId, userId)))
@@ -17,29 +17,44 @@ export class DrizzleStudyProgressRepository implements IStudyProgressRepository 
 		return row ? this.toEntity(row) : null;
 	}
 
-	findByDeckAndUser(deckId: UUID, userId: UUID): StudyProgress[] {
-		const cardIds = this.db
-			.select({ id: flashcards.id })
-			.from(flashcards)
-			.where(eq(flashcards.deckId, deckId))
-			.all()
-			.map((c) => c.id);
+	async findByDeckAndUser(deckId: UUID, userId: UUID): Promise<StudyProgress[]> {
+		const cardIds = (
+			await this.db
+				.select({ id: flashcards.id })
+				.from(flashcards)
+				.where(eq(flashcards.deckId, deckId))
+				.all()
+		).map((c) => c.id);
 
 		if (cardIds.length === 0) return [];
 
-		return this.db
-			.select()
-			.from(studyProgress)
-			.where(and(inArray(studyProgress.flashcardId, cardIds), eq(studyProgress.userId, userId)))
-			.all()
-			.map(this.toEntity);
+		return (
+			await this.db
+				.select()
+				.from(studyProgress)
+				.where(and(inArray(studyProgress.flashcardId, cardIds), eq(studyProgress.userId, userId)))
+				.all()
+		).map(this.toEntity);
 	}
 
-	upsert(input: UpsertStudyProgressInput): StudyProgress {
-		const existing = this.findByFlashcardAndUser(input.flashcardId, input.userId);
+	async findByFlashcardIdsAndUser(flashcardIds: UUID[], userId: UUID): Promise<StudyProgress[]> {
+		if (flashcardIds.length === 0) return [];
+		return (
+			await this.db
+				.select()
+				.from(studyProgress)
+				.where(
+					and(inArray(studyProgress.flashcardId, flashcardIds), eq(studyProgress.userId, userId)),
+				)
+				.all()
+		).map(this.toEntity);
+	}
+
+	async upsert(input: UpsertStudyProgressInput): Promise<StudyProgress> {
+		const existing = await this.findByFlashcardAndUser(input.flashcardId, input.userId);
 
 		if (existing) {
-			this.db
+			await this.db
 				.update(studyProgress)
 				.set({
 					easeFactor: input.easeFactor,
@@ -54,7 +69,7 @@ export class DrizzleStudyProgressRepository implements IStudyProgressRepository 
 		}
 
 		const id = newUUID();
-		this.db
+		await this.db
 			.insert(studyProgress)
 			.values({ id, ...input })
 			.run();

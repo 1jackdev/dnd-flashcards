@@ -2,7 +2,8 @@ import type { StudyProgress, UpsertStudyProgressInput } from "../entities/StudyP
 import type { UUID } from "../uuid";
 
 export interface IStudyProgressRepository {
-	findByFlashcardAndUser(flashcardId: UUID, userId: UUID): StudyProgress | null;
-	findByDeckAndUser(deckId: UUID, userId: UUID): StudyProgress[];
-	upsert(input: UpsertStudyProgressInput): StudyProgress;
+	findByFlashcardAndUser(flashcardId: UUID, userId: UUID): Promise<StudyProgress | null>;
+	findByDeckAndUser(deckId: UUID, userId: UUID): Promise<StudyProgress[]>;
+	findByFlashcardIdsAndUser(flashcardIds: UUID[], userId: UUID): Promise<StudyProgress[]>;
+	upsert(input: UpsertStudyProgressInput): Promise<StudyProgress>;
 }

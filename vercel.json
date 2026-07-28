@@ -1,0 +1,6 @@
+{
+	"rewrites": [
+		{ "source": "/(decks|flashcards|quiz|tags|auth)", "destination": "/api" },
+		{ "source": "/(decks|flashcards|quiz|tags|auth)/(.*)", "destination": "/api" }
+	]
+}

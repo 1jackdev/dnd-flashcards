@@ -10,29 +10,36 @@ export class FlashcardService {
 		private readonly deckRepo: IDeckRepository,
 	) {}
 
-	addCard(input: CreateFlashcardInput): Flashcard {
-		const deck = this.deckRepo.findById(input.deckId);
+	async addCard(input: CreateFlashcardInput): Promise<Flashcard> {
+		const deck = await this.deckRepo.findById(input.deckId);
 		if (!deck) throw new Error(`Deck not found: ${input.deckId}`);
 		return this.flashcardRepo.create(input);
 	}
 
-	getCard(id: UUID): Flashcard {
-		const card = this.flashcardRepo.findById(id);
+	async getCard(id: UUID): Promise<Flashcard> {
+		const card = await this.flashcardRepo.findById(id);
 		if (!card) throw new Error(`Flashcard not found: ${id}`);
 		return card;
 	}
 
-	listCards(deckId: UUID): Flashcard[] {
+	listCards(deckId: UUID): Promise<Flashcard[]> {
 		return this.flashcardRepo.findByDeckId(deckId);
 	}
 
-	updateCard(id: UUID, input: Partial<{ front: string; back: string; tags: Tag[] }>): Flashcard {
-		this.getCard(id);
+	listByTags(tags: Tag[]): Promise<Flashcard[]> {
+		return this.flashcardRepo.findByTags(tags);
+	}
+
+	async updateCard(
+		id: UUID,
+		input: Partial<{ front: string; back: string; tags: Tag[] }>,
+	): Promise<Flashcard> {
+		await this.getCard(id);
 		return this.flashcardRepo.update(id, input);
 	}
 
-	deleteCard(id: UUID): void {
-		this.getCard(id);
-		this.flashcardRepo.delete(id);
+	async deleteCard(id: UUID): Promise<void> {
+		await this.getCard(id);
+		await this.flashcardRepo.delete(id);
 	}
 }

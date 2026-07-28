@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Decks</title>
+<style>
+	:root {
+		color-scheme: light dark;
+		font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	}
+
+	body {
+		max-width: 720px;
+		margin: 2rem auto;
+		padding: 0 1rem;
+		color: #1a1a1a;
+		background: #fafafa;
+	}
+
+	h1 {
+		font-size: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	#search {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0.5rem 0.75rem;
+		font-size: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		margin-bottom: 1.5rem;
+	}
+
+	.deck-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.deck-card {
+		background: white;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		padding: 1rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.deck-card h2 {
+		font-size: 1.1rem;
+		margin: 0 0 0.25rem;
+	}
+
+	.deck-card p {
+		margin: 0;
+		color: #555;
+		font-size: 0.9rem;
+	}
+
+	.deck-card .meta {
+		margin-top: 0.5rem;
+		font-size: 0.75rem;
+		color: #888;
+	}
+
+	.pagination {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		margin-top: 1.5rem;
+	}
+
+	.pagination button {
+		padding: 0.4rem 0.9rem;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background: white;
+		cursor: pointer;
+		font-size: 0.9rem;
+	}
+
+	.pagination button:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.status {
+		text-align: center;
+		color: #777;
+		margin: 2rem 0;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			background: #1a1a1a;
+			color: #eee;
+		}
+
+		#search {
+			background: #2a2a2a;
+			border-color: #444;
+			color: #eee;
+		}
+
+		.deck-card {
+			background: #242424;
+			border-color: #3a3a3a;
+		}
+
+		.deck-card p {
+			color: #bbb;
+		}
+
+		.deck-card .meta {
+			color: #888;
+		}
+
+		.pagination button {
+			background: #2a2a2a;
+			border-color: #444;
+			color: #eee;
+		}
+	}
+</style>
+</head>
+<body>
+	<h1>Decks</h1>
+	<input id="search" type="text" placeholder="Search decks by name..." autocomplete="off" />
+	<ul id="deck-list" class="deck-list"></ul>
+	<div id="status" class="status"></div>
+	<div id="pagination" class="pagination" hidden>
+		<button id="prev-btn" type="button">Previous</button>
+		<span id="page-label"></span>
+		<button id="next-btn" type="button">Next</button>
+	</div>
+
+	<script>
+		// Relative base: this page is always served by the same Hono server
+		// that exposes the API (locally via serveStatic, in prod via Vercel),
+		// so same-origin requests avoid CORS entirely.
+		const API_BASE = "";
+
+		const PAGE_SIZE = 5;
+
+		let allDecks = [];
+		let filteredDecks = [];
+		let currentPage = 1;
+
+		const searchInput = document.getElementById("search");
+		const deckListEl = document.getElementById("deck-list");
+		const statusEl = document.getElementById("status");
+		const paginationEl = document.getElementById("pagination");
+		const prevBtn = document.getElementById("prev-btn");
+		const nextBtn = document.getElementById("next-btn");
+		const pageLabel = document.getElementById("page-label");
+
+		function totalPages() {
+			return Math.max(1, Math.ceil(filteredDecks.length / PAGE_SIZE));
+		}
+
+		function render() {
+			deckListEl.innerHTML = "";
+
+			if (filteredDecks.length === 0) {
+				statusEl.textContent = "No decks found.";
+				paginationEl.hidden = true;
+				return;
+			}
+
+			statusEl.textContent = "";
+			paginationEl.hidden = false;
+
+			const start = (currentPage - 1) * PAGE_SIZE;
+			const pageItems = filteredDecks.slice(start, start + PAGE_SIZE);
+
+			for (const deck of pageItems) {
+				const li = document.createElement("li");
+				li.className = "deck-card";
+
+				const title = document.createElement("h2");
+				const titleLink = document.createElement("a");
+				titleLink.href = `deck.html?id=${encodeURIComponent(deck.id)}`;
+				titleLink.textContent = deck.name;
+				title.append(titleLink);
+
+				const desc = document.createElement("p");
+				desc.textContent = deck.description || "";
+
+				const meta = document.createElement("div");
+				meta.className = "meta";
+				meta.textContent = `Created ${formatDate(deck.createdAt)} · Updated ${formatDate(deck.updatedAt)}`;
+
+				li.append(title, desc, meta);
+				deckListEl.append(li);
+			}
+
+			pageLabel.textContent = `Page ${currentPage} of ${totalPages()}`;
+			prevBtn.disabled = currentPage <= 1;
+			nextBtn.disabled = currentPage >= totalPages();
+		}
+
+		function formatDate(value) {
+			if (!value) return "unknown";
+			const d = new Date(value);
+			return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString();
+		}
+
+		function applyFilter(query) {
+			const q = query.trim().toLowerCase();
+			filteredDecks = q
+				? allDecks.filter((deck) => deck.name.toLowerCase().includes(q))
+				: allDecks.slice();
+			currentPage = 1;
+			render();
+		}
+
+		searchInput.addEventListener("input", (e) => applyFilter(e.target.value));
+
+		prevBtn.addEventListener("click", () => {
+			if (currentPage > 1) {
+				currentPage -= 1;
+				render();
+			}
+		});
+
+		nextBtn.addEventListener("click", () => {
+			if (currentPage < totalPages()) {
+				currentPage += 1;
+				render();
+			}
+		});
+
+		async function loadDecks() {
+			statusEl.textContent = "Loading decks...";
+			try {
+				const res = await fetch(`${API_BASE}/decks`);
+				if (!res.ok) {
+					throw new Error(`Request failed: ${res.status}`);
+				}
+				allDecks = await res.json();
+				applyFilter(searchInput.value);
+			} catch (err) {
+				statusEl.textContent = `Failed to load decks: ${err.message}`;
+				paginationEl.hidden = true;
+			}
+		}
+
+		loadDecks();
+	</script>
+</body>
+</html>

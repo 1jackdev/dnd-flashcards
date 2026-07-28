@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { CreateFlashcardInput, Flashcard } from "../../domain/entities/Flashcard";
 import type { IFlashcardRepository } from "../../domain/ports/IFlashcardRepository";
+import type { Tag } from "../../domain/tags";
 import { newUUID, type UUID } from "../../domain/uuid";
 import type { DB } from "./client";
 import { flashcards } from "./schema";
@@ -8,10 +9,10 @@ import { flashcards } from "./schema";
 export class DrizzleFlashcardRepository implements IFlashcardRepository {
 	constructor(private readonly db: DB) {}
 
-	create(input: CreateFlashcardInput): Flashcard {
+	async create(input: CreateFlashcardInput): Promise<Flashcard> {
 		const now = new Date();
 		const id = newUUID();
-		this.db
+		await this.db
 			.insert(flashcards)
 			.values({
 				id,
@@ -26,36 +27,41 @@ export class DrizzleFlashcardRepository implements IFlashcardRepository {
 		return { id, ...input, createdAt: now, updatedAt: now };
 	}
 
-	findById(id: UUID): Flashcard | null {
-		const row = this.db.select().from(flashcards).where(eq(flashcards.id, id)).get();
+	async findById(id: UUID): Promise<Flashcard | null> {
+		const row = await this.db.select().from(flashcards).where(eq(flashcards.id, id)).get();
 		if (!row) return null;
 		return row as Flashcard;
 	}
 
-	findByDeckId(deckId: UUID): Flashcard[] {
-		return this.db
+	async findByDeckId(deckId: UUID): Promise<Flashcard[]> {
+		return (await this.db
 			.select()
 			.from(flashcards)
 			.where(eq(flashcards.deckId, deckId))
-			.all() as Flashcard[];
+			.all()) as Flashcard[];
 	}
 
-	update(
+	async findByTags(tags: Tag[]): Promise<Flashcard[]> {
+		const all = (await this.db.select().from(flashcards).all()) as Flashcard[];
+		return all.filter((card) => card.tags.some((t) => tags.includes(t as Tag)));
+	}
+
+	async update(
 		id: UUID,
 		input: Partial<Pick<CreateFlashcardInput, "front" | "back" | "tags">>,
-	): Flashcard {
+	): Promise<Flashcard> {
 		const updatedAt = new Date();
-		this.db
+		await this.db
 			.update(flashcards)
 			.set({ ...input, updatedAt })
 			.where(eq(flashcards.id, id))
 			.run();
-		const updated = this.findById(id);
+		const updated = await this.findById(id);
 		if (!updated) throw new Error(`Flashcard not found after update: ${id}`);
 		return updated;
 	}
 
-	delete(id: UUID): void {
-		this.db.delete(flashcards).where(eq(flashcards.id, id)).run();
+	async delete(id: UUID): Promise<void> {
+		await this.db.delete(flashcards).where(eq(flashcards.id, id)).run();
 	}
 }

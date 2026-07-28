@@ -1,0 +1,23 @@
+info:
+  name: create quiz question
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: http://localhost:3000/flashcards/{{flashcardId}}/quiz
+  body:
+    type: json
+    data: |-
+      {
+        "type": "true_false",
+        "question": "The Poisoned condition gives disadvantage on attack rolls and ability checks.",
+        "correctAnswer": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
