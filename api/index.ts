@@ -5,7 +5,9 @@ import { createApp } from "../src/app";
 // randomUUID, which Edge's V8-isolate runtime does not support. hono/vercel's
 // handle() just wraps app.fetch in a (req) => Response function, which
 // Vercel's Node.js serverless runtime accepts directly as a Web-standard
-// fetch handler.
+// fetch handler. `bunVersion` in vercel.json makes Bun the actual process
+// executing this function, so extensionless relative imports resolve exactly
+// like they do locally — no separate bundling step needed.
 export const config = { runtime: "nodejs" };
 
 const app = await createApp();
