@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Log in</title>
+<style>
+	:root {
+		color-scheme: light dark;
+		font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	}
+
+	body {
+		max-width: 360px;
+		margin: 4rem auto;
+		padding: 0 1rem;
+		color: #1a1a1a;
+		background: #fafafa;
+	}
+
+	h1 {
+		font-size: 1.5rem;
+		margin: 0 0 1.5rem;
+		text-align: center;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	label {
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	input {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0.5rem 0.75rem;
+		font-size: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+	}
+
+	.btn-primary {
+		margin-top: 0.5rem;
+		padding: 0.6rem 1rem;
+		border: 1px solid #1a1a1a;
+		border-radius: 6px;
+		background: #1a1a1a;
+		color: white;
+		font-size: 0.95rem;
+		cursor: pointer;
+	}
+
+	.btn-primary:hover {
+		background: #333;
+	}
+
+	.status {
+		text-align: center;
+		color: #c62828;
+		font-size: 0.85rem;
+		min-height: 1.2em;
+		margin-top: 0.75rem;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			background: #1a1a1a;
+			color: #eee;
+		}
+
+		input {
+			background: #2a2a2a;
+			border-color: #444;
+			color: #eee;
+		}
+
+		.btn-primary {
+			background: #eee;
+			color: #1a1a1a;
+			border-color: #eee;
+		}
+
+		.btn-primary:hover {
+			background: #ccc;
+		}
+	}
+</style>
+</head>
+<body>
+	<h1>Log in</h1>
+	<form id="login-form">
+		<label for="username">Username</label>
+		<input id="username" name="username" type="text" autocomplete="username" required />
+
+		<label for="password">Password</label>
+		<input id="password" name="password" type="password" autocomplete="current-password" required />
+
+		<button type="submit" class="btn-primary">Log in</button>
+		<p id="status" class="status"></p>
+	</form>
+
+	<script>
+		// Relative base: this page is always served by the same Hono server
+		// that exposes the API (locally via serveStatic, in prod via Vercel).
+		const API_BASE = "";
+
+		const form = document.getElementById("login-form");
+		const statusEl = document.getElementById("status");
+
+		const params = new URLSearchParams(location.search);
+		const next = params.get("next") || "decks.html";
+
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			statusEl.textContent = "";
+
+			const username = document.getElementById("username").value;
+			const password = document.getElementById("password").value;
+
+			try {
+				const res = await fetch(`${API_BASE}/auth/login`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ username, password }),
+				});
+				if (!res.ok) {
+					const body = await res.json().catch(() => ({}));
+					throw new Error(body.error || `Request failed: ${res.status}`);
+				}
+				const { user, token } = await res.json();
+				localStorage.setItem("authToken", token);
+				localStorage.setItem("username", user.username);
+				location.href = next;
+			} catch (err) {
+				statusEl.textContent = err.message;
+			}
+		});
+	</script>
+</body>
+</html>

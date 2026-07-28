@@ -18,9 +18,32 @@
 		background: #fafafa;
 	}
 
+	.top-bar {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
+
 	h1 {
 		font-size: 1.5rem;
-		margin-bottom: 1rem;
+		margin: 0;
+	}
+
+	.account-bar {
+		font-size: 0.85rem;
+		color: #555;
+	}
+
+	.account-bar a,
+	.account-bar button {
+		color: #555;
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		cursor: pointer;
+		text-decoration: underline;
 	}
 
 	#search {
@@ -122,18 +145,30 @@
 			border-color: #444;
 			color: #eee;
 		}
+
+		.account-bar,
+		.account-bar a,
+		.account-bar button {
+			color: #aaa;
+		}
 	}
 </style>
 </head>
 <body>
-	<h1>Decks</h1>
-	<input id="search" type="text" placeholder="Search decks by name..." autocomplete="off" />
-	<ul id="deck-list" class="deck-list"></ul>
-	<div id="status" class="status"></div>
-	<div id="pagination" class="pagination" hidden>
-		<button id="prev-btn" type="button">Previous</button>
-		<span id="page-label"></span>
-		<button id="next-btn" type="button">Next</button>
+	<div class="top-bar" id="top-bar" hidden>
+		<h1>Decks</h1>
+		<div class="account-bar" id="account-bar"></div>
+	</div>
+
+	<div id="app-content" hidden>
+		<input id="search" type="text" placeholder="Search decks by name..." autocomplete="off" />
+		<ul id="deck-list" class="deck-list"></ul>
+		<div id="status" class="status"></div>
+		<div id="pagination" class="pagination" hidden>
+			<button id="prev-btn" type="button">Previous</button>
+			<span id="page-label"></span>
+			<button id="next-btn" type="button">Next</button>
+		</div>
 	</div>
 
 	<script>
@@ -141,6 +176,11 @@
 		// that exposes the API (locally via serveStatic, in prod via Vercel),
 		// so same-origin requests avoid CORS entirely.
 		const API_BASE = "";
+
+		function authHeaders() {
+			const token = localStorage.getItem("authToken");
+			return token ? { Authorization: `Bearer ${token}` } : {};
+		}
 
 		const PAGE_SIZE = 5;
 
@@ -235,7 +275,7 @@
 		async function loadDecks() {
 			statusEl.textContent = "Loading decks...";
 			try {
-				const res = await fetch(`${API_BASE}/decks`);
+				const res = await fetch(`${API_BASE}/decks`, { headers: authHeaders() });
 				if (!res.ok) {
 					throw new Error(`Request failed: ${res.status}`);
 				}
@@ -247,7 +287,28 @@
 			}
 		}
 
-		loadDecks();
+		function renderAccountBar() {
+			const accountBarEl = document.getElementById("account-bar");
+			accountBarEl.innerHTML = "";
+			const logoutBtn = document.createElement("button");
+			logoutBtn.type = "button";
+			logoutBtn.textContent = "Log out";
+			logoutBtn.addEventListener("click", () => {
+				localStorage.removeItem("authToken");
+				localStorage.removeItem("username");
+				location.reload();
+			});
+			accountBarEl.append(logoutBtn);
+		}
+
+		if (!localStorage.getItem("authToken")) {
+			location.href = `login.html?next=${encodeURIComponent(location.pathname + location.search)}`;
+		} else {
+			document.getElementById("top-bar").hidden = false;
+			document.getElementById("app-content").hidden = false;
+			renderAccountBar();
+			loadDecks();
+		}
 	</script>
 </body>
 </html>

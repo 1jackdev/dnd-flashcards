@@ -6,7 +6,16 @@ info:
 http:
   method: GET
   url: http://localhost:3000/decks/{{deckId}}/due
+  headers:
+    - name: Authorization
+      value: Bearer {{token}}
+      enabled: true
   auth: inherit
+
+runtime:
+  variables:
+    - name: token
+      value: ""
 
 settings:
   encodeUrl: true

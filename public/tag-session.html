@@ -34,6 +34,28 @@
 		text-decoration: underline;
 	}
 
+	.top-bar {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+	}
+
+	.account-bar {
+		font-size: 0.85rem;
+		color: #555;
+	}
+
+	.account-bar a,
+	.account-bar button {
+		color: #555;
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		cursor: pointer;
+		text-decoration: underline;
+	}
+
 	h1 {
 		font-size: 1.5rem;
 		margin: 0 0 0.25rem;
@@ -343,6 +365,12 @@
 			color: #aaa;
 		}
 
+		.account-bar,
+		.account-bar a,
+		.account-bar button {
+			color: #aaa;
+		}
+
 		.tabs {
 			border-bottom-color: #333;
 		}
@@ -431,71 +459,96 @@
 </style>
 </head>
 <body>
-	<a class="back-link" href="tags.html">&larr; Tag picker</a>
-	<h1 id="deck-name">Loading…</h1>
-	<p class="deck-description" id="deck-description"></p>
-
-	<div class="tabs">
-		<button class="tab-btn active" type="button" data-view="flashcards">Flashcards</button>
-		<button class="tab-btn" type="button" data-view="study">Study</button>
-		<button class="tab-btn" type="button" data-view="quiz">Quiz</button>
+	<div class="top-bar" id="top-bar" hidden>
+		<a class="back-link" href="tags.html">&larr; Tag picker</a>
+		<div class="account-bar" id="account-bar"></div>
 	</div>
 
-	<!-- Flashcards view -->
-	<section id="view-flashcards" class="view active">
-		<input id="search" type="text" placeholder="Search flashcards..." autocomplete="off" />
-		<ul id="card-list" class="card-list"></ul>
-		<div id="card-status" class="status"></div>
-		<div id="card-pagination" class="pagination" hidden>
-			<button id="card-prev-btn" type="button" class="btn">Previous</button>
-			<span id="card-page-label"></span>
-			<button id="card-next-btn" type="button" class="btn">Next</button>
-		</div>
-	</section>
+	<div id="app-content" hidden>
+		<h1 id="deck-name">Loading…</h1>
+		<p class="deck-description" id="deck-description"></p>
 
-	<!-- Study view -->
-	<section id="view-study" class="view">
-		<div id="study-status" class="status"></div>
-		<div id="study-body" hidden>
-			<div class="session-summary" id="study-position"></div>
-			<div class="study-card">
-				<p class="front" id="study-front"></p>
-				<p class="back" id="study-back" hidden></p>
-				<p class="progress-line" id="study-progress-line"></p>
-				<button id="reveal-btn" type="button" class="btn btn-primary">Reveal answer</button>
-				<div class="rating-row" id="rating-row" hidden>
-					<button class="btn" type="button" data-rating="blackout">Blackout</button>
-					<button class="btn" type="button" data-rating="wrong">Wrong</button>
-					<button class="btn" type="button" data-rating="familiar_wrong">Familiar</button>
-					<button class="btn" type="button" data-rating="difficult">Difficult</button>
-					<button class="btn" type="button" data-rating="correct">Correct</button>
-					<button class="btn" type="button" data-rating="perfect">Perfect</button>
+		<div class="tabs">
+			<button class="tab-btn active" type="button" data-view="flashcards">Flashcards</button>
+			<button class="tab-btn" type="button" data-view="study">Study</button>
+			<button class="tab-btn" type="button" data-view="quiz">Quiz</button>
+		</div>
+
+		<!-- Flashcards view -->
+		<section id="view-flashcards" class="view active">
+			<input id="search" type="text" placeholder="Search flashcards..." autocomplete="off" />
+			<ul id="card-list" class="card-list"></ul>
+			<div id="card-status" class="status"></div>
+			<div id="card-pagination" class="pagination" hidden>
+				<button id="card-prev-btn" type="button" class="btn">Previous</button>
+				<span id="card-page-label"></span>
+				<button id="card-next-btn" type="button" class="btn">Next</button>
+			</div>
+		</section>
+
+		<!-- Study view -->
+		<section id="view-study" class="view">
+			<div id="study-status" class="status"></div>
+			<div id="study-body" hidden>
+				<div class="session-summary" id="study-position"></div>
+				<div class="study-card">
+					<p class="front" id="study-front"></p>
+					<p class="back" id="study-back" hidden></p>
+					<p class="progress-line" id="study-progress-line"></p>
+					<button id="reveal-btn" type="button" class="btn btn-primary">Reveal answer</button>
+					<div class="rating-row" id="rating-row" hidden>
+						<button class="btn" type="button" data-rating="blackout">Blackout</button>
+						<button class="btn" type="button" data-rating="wrong">Wrong</button>
+						<button class="btn" type="button" data-rating="familiar_wrong">Familiar</button>
+						<button class="btn" type="button" data-rating="difficult">Difficult</button>
+						<button class="btn" type="button" data-rating="correct">Correct</button>
+						<button class="btn" type="button" data-rating="perfect">Perfect</button>
+					</div>
 				</div>
 			</div>
-		</div>
-	</section>
+		</section>
 
-	<!-- Quiz view -->
-	<section id="view-quiz" class="view">
-		<div id="quiz-status" class="status"></div>
-		<button id="quiz-restart-btn" type="button" class="btn" hidden>Retake quiz</button>
-		<div id="quiz-body" hidden>
-			<div class="session-summary" id="quiz-score"></div>
-			<div class="quiz-card">
-				<p class="question" id="quiz-question"></p>
-				<ul class="choice-list" id="quiz-choices"></ul>
-				<p class="feedback" id="quiz-feedback" hidden></p>
-				<button id="quiz-reveal-btn" type="button" class="btn" hidden>Reveal answer</button>
-				<button id="quiz-next-btn" type="button" class="btn btn-primary" hidden>Next question</button>
+		<!-- Quiz view -->
+		<section id="view-quiz" class="view">
+			<div id="quiz-status" class="status"></div>
+			<button id="quiz-restart-btn" type="button" class="btn" hidden>Retake quiz</button>
+			<div id="quiz-body" hidden>
+				<div class="session-summary" id="quiz-score"></div>
+				<div class="quiz-card">
+					<p class="question" id="quiz-question"></p>
+					<ul class="choice-list" id="quiz-choices"></ul>
+					<p class="feedback" id="quiz-feedback" hidden></p>
+					<button id="quiz-reveal-btn" type="button" class="btn" hidden>Reveal answer</button>
+					<button id="quiz-next-btn" type="button" class="btn btn-primary" hidden>Next question</button>
+				</div>
 			</div>
-		</div>
-	</section>
+		</section>
+	</div>
 
 	<script>
 		// Relative base: this page is always served by the same Hono server
 		// that exposes the API (locally via serveStatic, in prod via Vercel),
 		// so same-origin requests avoid CORS entirely.
 		const API_BASE = "";
+
+		function authHeaders() {
+			const token = localStorage.getItem("authToken");
+			return token ? { Authorization: `Bearer ${token}` } : {};
+		}
+
+		function renderAccountBar() {
+			const accountBarEl = document.getElementById("account-bar");
+			accountBarEl.innerHTML = "";
+			const logoutBtn = document.createElement("button");
+			logoutBtn.type = "button";
+			logoutBtn.textContent = "Log out";
+			logoutBtn.addEventListener("click", () => {
+				localStorage.removeItem("authToken");
+				localStorage.removeItem("username");
+				location.reload();
+			});
+			accountBarEl.append(logoutBtn);
+		}
 
 		const params = new URLSearchParams(location.search);
 		const tags = (params.get("tags") || "")
@@ -652,7 +705,7 @@
 		async function loadFlashcards() {
 			cardStatusEl.textContent = "Loading flashcards...";
 			try {
-				const res = await fetch(`${API_BASE}/tags/flashcards?tags=${tagsQuery}`);
+				const res = await fetch(`${API_BASE}/tags/flashcards?tags=${tagsQuery}`, { headers: authHeaders() });
 				if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 				allCards = await res.json();
 				applyCardFilter(searchInput.value);
@@ -721,7 +774,7 @@
 				try {
 					await fetch(`${API_BASE}/flashcards/${flashcard.id}/review`, {
 						method: "POST",
-						headers: { "Content-Type": "application/json" },
+						headers: { "Content-Type": "application/json", ...authHeaders() },
 						body: JSON.stringify({ rating }),
 					});
 				} catch {
@@ -736,7 +789,7 @@
 			studyStatusEl.textContent = "Loading study session...";
 			studyBodyEl.hidden = true;
 			try {
-				const res = await fetch(`${API_BASE}/tags/study?tags=${tagsQuery}`);
+				const res = await fetch(`${API_BASE}/tags/study?tags=${tagsQuery}`, { headers: authHeaders() });
 				if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 				const summary = await res.json();
 				studyQueue = summary.cards;
@@ -872,7 +925,7 @@
 			quizStatusEl.textContent = "Loading quiz...";
 			quizBodyEl.hidden = true;
 			try {
-				const res = await fetch(`${API_BASE}/tags/quiz?tags=${tagsQuery}`);
+				const res = await fetch(`${API_BASE}/tags/quiz?tags=${tagsQuery}`, { headers: authHeaders() });
 				if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 				quizQuestions = shuffle(await res.json());
 				quizIndex = 0;
@@ -885,8 +938,15 @@
 		}
 
 		// ---------- Init ----------
-		if (tags.length > 0) {
-			loadFlashcards();
+		if (!localStorage.getItem("authToken")) {
+			location.href = `login.html?next=${encodeURIComponent(location.pathname + location.search)}`;
+		} else {
+			document.getElementById("top-bar").hidden = false;
+			document.getElementById("app-content").hidden = false;
+			renderAccountBar();
+			if (tags.length > 0) {
+				loadFlashcards();
+			}
 		}
 	</script>
 </body>

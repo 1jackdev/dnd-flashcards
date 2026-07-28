@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { buildContainer } from "./container";
 import { createDb } from "./infrastructure/db/client";
 import { authRoutes } from "./infrastructure/http/routes/auth.routes";
@@ -44,6 +45,9 @@ export async function createApp() {
 	app.route("/auth", authRoutes(authController));
 
 	app.onError((err, c) => {
+		if (err instanceof HTTPException) {
+			return c.json({ error: err.message }, err.status);
+		}
 		const message = err instanceof Error ? err.message : "Unknown error";
 		const status = message.includes("not found") ? 404 : 500;
 		return c.json({ error: message }, status);

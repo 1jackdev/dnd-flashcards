@@ -6,12 +6,18 @@ info:
 http:
   method: GET
   url: http://localhost:3000/decks/{{deckId}}/progress
+  headers:
+    - name: Authorization
+      value: Bearer {{token}}
+      enabled: true
   auth: inherit
 
 runtime:
   variables:
     - name: deckId
       value: 8086ba10-ddc5-4e32-b952-cc3ae72951ed
+    - name: token
+      value: ""
 
 settings:
   encodeUrl: true

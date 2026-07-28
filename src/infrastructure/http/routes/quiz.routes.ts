@@ -1,11 +1,12 @@
 import { Hono } from "hono";
-import { ANONYMOUS_USER_ID } from "../../../domain/constants";
 import { parseUUID } from "../../../domain/uuid";
 import type { QuizController } from "../controllers/QuizController";
+import { type AuthVariables, authMiddleware } from "../middleware/auth";
 import { RecordQuizAttemptSchema } from "../schemas";
 
 export function quizRoutes(quiz: QuizController) {
-	const app = new Hono();
+	const app = new Hono<{ Variables: AuthVariables }>();
+	app.use("*", authMiddleware);
 
 	app.get("/:id", async (c) => {
 		return c.json(await quiz.getById(parseUUID(c.req.param("id"))));
@@ -19,7 +20,7 @@ export function quizRoutes(quiz: QuizController) {
 	app.post("/:id/attempt", async (c) => {
 		const body = RecordQuizAttemptSchema.parse(await c.req.json());
 		return c.json(
-			await quiz.recordAttempt(parseUUID(c.req.param("id")), ANONYMOUS_USER_ID, body.correct),
+			await quiz.recordAttempt(parseUUID(c.req.param("id")), c.get("userId"), body.correct),
 		);
 	});
 

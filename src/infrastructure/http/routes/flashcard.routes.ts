@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { ANONYMOUS_USER_ID } from "../../../domain/constants";
 import { parseUUID } from "../../../domain/uuid";
 import type { FlashcardController } from "../controllers/FlashcardController";
 import type { QuizController } from "../controllers/QuizController";
 import type { StudyController } from "../controllers/StudyController";
+import { type AuthVariables, authMiddleware } from "../middleware/auth";
 import { CreateQuizQuestionSchema, ReviewCardSchema, UpdateFlashcardSchema } from "../schemas";
 
 export function flashcardRoutes(
@@ -11,7 +11,8 @@ export function flashcardRoutes(
 	study: StudyController,
 	quiz: QuizController,
 ) {
-	const app = new Hono();
+	const app = new Hono<{ Variables: AuthVariables }>();
+	app.use("*", authMiddleware);
 
 	app.get("/:id", async (c) => {
 		return c.json(await flashcard.getById(parseUUID(c.req.param("id"))));
@@ -30,7 +31,7 @@ export function flashcardRoutes(
 	app.post("/:id/review", async (c) => {
 		const body = ReviewCardSchema.parse(await c.req.json());
 		return c.json(
-			await study.reviewCard(parseUUID(c.req.param("id")), ANONYMOUS_USER_ID, body.rating),
+			await study.reviewCard(parseUUID(c.req.param("id")), c.get("userId"), body.rating),
 		);
 	});
 

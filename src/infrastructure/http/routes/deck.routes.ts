@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import { ANONYMOUS_USER_ID } from "../../../domain/constants";
 import { parseUUID } from "../../../domain/uuid";
 import type { DeckController } from "../controllers/DeckController";
 import type { FlashcardController } from "../controllers/FlashcardController";
 import type { QuizController } from "../controllers/QuizController";
 import type { StudyController } from "../controllers/StudyController";
+import { type AuthVariables, authMiddleware } from "../middleware/auth";
 import { CreateDeckSchema, CreateFlashcardSchema, UpdateDeckSchema } from "../schemas";
 
 export function deckRoutes(
@@ -13,7 +13,8 @@ export function deckRoutes(
 	study: StudyController,
 	quiz: QuizController,
 ) {
-	const app = new Hono();
+	const app = new Hono<{ Variables: AuthVariables }>();
+	app.use("*", authMiddleware);
 
 	app.post("/", async (c) => {
 		const body = CreateDeckSchema.parse(await c.req.json());
@@ -48,11 +49,11 @@ export function deckRoutes(
 	});
 
 	app.get("/:deckId/due", async (c) => {
-		return c.json(await study.getDueCards(parseUUID(c.req.param("deckId")), ANONYMOUS_USER_ID));
+		return c.json(await study.getDueCards(parseUUID(c.req.param("deckId")), c.get("userId")));
 	});
 
 	app.get("/:deckId/progress", async (c) => {
-		return c.json(await study.getDeckProgress(parseUUID(c.req.param("deckId")), ANONYMOUS_USER_ID));
+		return c.json(await study.getDeckProgress(parseUUID(c.req.param("deckId")), c.get("userId")));
 	});
 
 	app.get("/:deckId/quiz", async (c) => {
@@ -60,7 +61,7 @@ export function deckRoutes(
 	});
 
 	app.get("/:deckId/quiz-progress", async (c) => {
-		return c.json(await quiz.getDeckProgress(parseUUID(c.req.param("deckId")), ANONYMOUS_USER_ID));
+		return c.json(await quiz.getDeckProgress(parseUUID(c.req.param("deckId")), c.get("userId")));
 	});
 
 	return app;

@@ -6,6 +6,10 @@ info:
 http:
   method: POST
   url: http://localhost:3000/quiz/{{quizQuestionId}}/attempt
+  headers:
+    - name: Authorization
+      value: Bearer {{token}}
+      enabled: true
   body:
     type: json
     data: |-
@@ -13,6 +17,11 @@ http:
         "correct": true
       }
   auth: inherit
+
+runtime:
+  variables:
+    - name: token
+      value: ""
 
 settings:
   encodeUrl: true

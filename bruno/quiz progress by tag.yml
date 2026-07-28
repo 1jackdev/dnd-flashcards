@@ -6,12 +6,18 @@ info:
 http:
   method: GET
   url: http://localhost:3000/tags/quiz-progress?tags={{tag}}
+  headers:
+    - name: Authorization
+      value: Bearer {{token}}
+      enabled: true
   auth: inherit
 
 runtime:
   variables:
     - name: tag
       value: condition
+    - name: token
+      value: ""
 
 settings:
   encodeUrl: true
