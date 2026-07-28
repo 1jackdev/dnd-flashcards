@@ -290,6 +290,13 @@
 		function renderAccountBar() {
 			const accountBarEl = document.getElementById("account-bar");
 			accountBarEl.innerHTML = "";
+
+			const tagsLink = document.createElement("a");
+			tagsLink.href = "tags.html";
+			tagsLink.textContent = "Study by tag";
+
+			const separator = document.createTextNode(" · ");
+
 			const logoutBtn = document.createElement("button");
 			logoutBtn.type = "button";
 			logoutBtn.textContent = "Log out";
@@ -298,7 +305,8 @@
 				localStorage.removeItem("username");
 				location.reload();
 			});
-			accountBarEl.append(logoutBtn);
+
+			accountBarEl.append(tagsLink, separator, logoutBtn);
 		}
 
 		if (!localStorage.getItem("authToken")) {

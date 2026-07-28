@@ -11,6 +11,7 @@
 		"db:push": "drizzle-kit push",
 		"db:reset": "bun run scripts/reset-db.ts",
 		"db:seed": "bun run scripts/seed.ts",
+		"db:seed:quiz": "bun run scripts/seed-quiz.ts",
 		"test": "bun test --coverage",
 		"prepare": "simple-git-hooks"
 	},
