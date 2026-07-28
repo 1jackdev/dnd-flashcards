@@ -24,10 +24,12 @@ export async function createApp() {
 
 	const app = new Hono();
 
-	// `hono/bun`'s serveStatic uses Bun.file directly and only runs under the
-	// Bun runtime; it is applied in src/main.ts, not here. On Vercel, files in
-	// public/ are served directly by Vercel's static file host.
-	if (typeof Bun !== "undefined") {
+	// `hono/bun`'s serveStatic uses Bun.file directly. Vercel's deployed
+	// functions also run under Bun (see vercel.json's bunVersion), so
+	// `typeof Bun !== "undefined"` is true there too — `process.env.VERCEL` is
+	// what actually distinguishes local dev from a Vercel deployment, where
+	// files in public/ are served directly by Vercel's static file host instead.
+	if (typeof Bun !== "undefined" && !process.env.VERCEL) {
 		const { serveStatic } = await import("hono/bun");
 		app.use("/public/*", serveStatic({ root: "./" }));
 	}
